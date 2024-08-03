@@ -1,25 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Container, Typography } from '@mui/material';
+import EquipmentList from './components/EquipmentList';
+import EquipmentForm from './components/EquipmentForm';
+import { ToastContainer } from 'react-toastify';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        Control de Inventarios
+      </Typography>
+      <EquipmentForm />
+      <EquipmentList />
+      <ToastContainer />
+    </Container>
   );
-}
+};
 
 export default App;
