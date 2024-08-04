@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Container, TextField, Button } from '@mui/material';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import fetchEquipment from './fetchEquipment'; 
-
+import { SharedContext } from '../SharedContext';
 
 const EquipmentForm = () => {
+  const { sharedVariable, setSharedVariable } = useContext(SharedContext);
   const [formData, setFormData] = useState({
     brand: '',
     model: '',
@@ -14,6 +14,13 @@ const EquipmentForm = () => {
     supplier: '',
     cost: '',
   });
+
+  const fetchEquipment = async () => {
+    const response = await api.get('/equipments/');
+    setSharedVariable(response.data);
+    console.log("valor de sharedVariable: "+sharedVariable)
+  };
+
 
   const handleChange = (e) => {
     setFormData({
@@ -24,20 +31,25 @@ const EquipmentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       await api.post('/equipments/', formData);
-  
+
       toast.success('Equipment added successfully!', {
-        position: 'top-right'
+        position: 'top-right',
       });
-  
+
       fetchEquipment();
     } catch (error) {
-      toast.error(`Error: ${error.response?.data?.message || 'An unexpected error occurred'}`, {
-        position: 'bottom-left'
-      });
-  
+      toast.error(
+        `Error: ${
+          error.response?.data?.message || 'An unexpected error occurred'
+        }`,
+        {
+          position: 'bottom-left',
+        },
+      );
+
       console.error('Error while submitting the form:', error);
     }
   };
