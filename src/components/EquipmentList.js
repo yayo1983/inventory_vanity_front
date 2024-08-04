@@ -9,7 +9,10 @@ import {
   Button,
   Modal,
   Box,
-  TextField,
+  Select,
+  InputLabel,
+  MenuItem,
+  FormControl,
 } from '@mui/material';
 import api from '../services/api';
 import { toast } from 'react-toastify';
@@ -23,6 +26,8 @@ const EquipmentList = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [newDepartmentId, setNewDepartmentId] = useState('');
   const [newUserId, setNewUserId] = useState('');
+  const [departments, setDepartments] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const fetchEquipment = useCallback(async () => {
     try {
@@ -34,9 +39,29 @@ const EquipmentList = () => {
     }
   }, [setSharedVariable]);
 
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await api.get('/departments/');
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await api.get('/users/');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchEquipment();
-  }, [fetchEquipment]);
+    fetchDepartments();
+    fetchUsers();
+  }, [fetchEquipment, fetchDepartments, fetchUsers]);
 
   const handleDelete = async (id) => {
     try {
@@ -149,6 +174,7 @@ const EquipmentList = () => {
             <TableCell>Costo</TableCell>
             <TableCell>Estado</TableCell>
             <TableCell>Usuario</TableCell>
+            <TableCell>Departamento</TableCell>
             <TableCell>Acciones</TableCell>
           </TableRow>
         </TableHead>
@@ -161,8 +187,9 @@ const EquipmentList = () => {
                 <TableCell>{item.purchase_date}</TableCell>
                 <TableCell>{item.supplier}</TableCell>
                 <TableCell>{item.cost}</TableCell>
-                <TableCell>{item.active? "Alta":"Baja"}</TableCell>
-                <TableCell>{item.user? item.user:"Sin usuario"}</TableCell>
+                <TableCell>{item.active ? 'Alta' : 'Baja'}</TableCell>
+                <TableCell>{item.user ? item.user : 'Sin usuario'}</TableCell>
+                <TableCell>{item.department ? item.department : 'Sin departamento'}</TableCell>
                 <TableCell>
                   <Button onClick={() => handleDelete(item.id)}>
                     Eliminar
@@ -197,20 +224,36 @@ const EquipmentList = () => {
           }}
         >
           <h2>Reasignar Equipo</h2>
-          <TextField
-            label="Nuevo Departamento ID"
-            value={newDepartmentId}
-            onChange={(e) => setNewDepartmentId(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Nuevo Usuario ID"
-            value={newUserId}
-            onChange={(e) => setNewUserId(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="department-label">Departamento</InputLabel>
+            <Select
+              labelId="department-label"
+              value={newDepartmentId}
+              onChange={(e) => setNewDepartmentId(e.target.value)}
+              label="Departamento"
+            >
+              {departments.map((department) => (
+                <MenuItem key={department.id} value={department.id}>
+                  {department.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="user-label">Usuario</InputLabel>
+            <Select
+              labelId="user-label"
+              value={newUserId}
+              onChange={(e) => setNewUserId(e.target.value)}
+              label="Usuario"
+            >
+              {users.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.username}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Button onClick={handleReassign} color="primary" variant="contained">
             Reasignar
           </Button>
