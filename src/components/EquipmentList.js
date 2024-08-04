@@ -8,6 +8,7 @@ import {
   TableRow,
   Button,
   Modal,
+  Box,
   TextField,
 } from '@mui/material';
 import api from '../services/api';
@@ -16,15 +17,17 @@ import 'react-toastify/dist/ReactToastify.css';
 import { SharedContext } from '../SharedContext';
 
 const EquipmentList = () => {
+  const [equipment, setEquipment] = useState([]);
   const { sharedVariable, setSharedVariable } = useContext(SharedContext);
   const [open, setOpen] = useState(false);
-  const [selectedEquipmentId] = useState(null);
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [newDepartmentId, setNewDepartmentId] = useState('');
   const [newUserId, setNewUserId] = useState('');
 
   const fetchEquipment = useCallback(async () => {
     try {
       const response = await api.get('/equipments/');
+      setEquipment(response.data);
       setSharedVariable(response.data);
     } catch (error) {
       console.error('Error fetching equipment:', error);
@@ -123,7 +126,10 @@ const EquipmentList = () => {
     }
   };
 
-
+  const handleOpen = (id) => {
+    setSelectedEquipmentId(id);
+    setOpen(true);
+  };
 
   const handleClose = () => {
     setOpen(false);
@@ -141,6 +147,8 @@ const EquipmentList = () => {
             <TableCell>Fecha de Compra</TableCell>
             <TableCell>Proveedor</TableCell>
             <TableCell>Costo</TableCell>
+            <TableCell>Estado</TableCell>
+            <TableCell>Usuario</TableCell>
             <TableCell>Acciones</TableCell>
           </TableRow>
         </TableHead>
@@ -153,17 +161,13 @@ const EquipmentList = () => {
                 <TableCell>{item.purchase_date}</TableCell>
                 <TableCell>{item.supplier}</TableCell>
                 <TableCell>{item.cost}</TableCell>
+                <TableCell>{item.active? "Alta":"Baja"}</TableCell>
+                <TableCell>{item.user? item.user:"Sin usuario"}</TableCell>
                 <TableCell>
                   <Button onClick={() => handleDelete(item.id)}>
                     Eliminar
                   </Button>
-                  <Button
-                    onClick={() =>
-                      handleReassign(item.id, newDepartmentId, newUserId)
-                    }
-                  >
-                    Reasignar
-                  </Button>
+                  <Button onClick={() => handleOpen(item.id)}>Reasignar</Button>
                   <Button onClick={() => handleDeactivate(item.id)}>
                     Dar de Baja
                   </Button>
@@ -181,7 +185,17 @@ const EquipmentList = () => {
         </TableBody>
       </Table>
       <Modal open={open} onClose={handleClose}>
-        <Container>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
           <h2>Reasignar Equipo</h2>
           <TextField
             label="Nuevo Departamento ID"
@@ -203,7 +217,7 @@ const EquipmentList = () => {
           <Button onClick={handleClose} color="secondary" variant="contained">
             Cancelar
           </Button>
-        </Container>
+        </Box>
       </Modal>
     </Container>
   );
