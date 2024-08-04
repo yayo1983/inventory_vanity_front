@@ -13,7 +13,7 @@ import {
   InputLabel,
   MenuItem,
   FormControl,
-  TextField
+  TextField,
 } from '@mui/material';
 import api from '../services/api';
 import { toast } from 'react-toastify';
@@ -169,7 +169,6 @@ const EquipmentList = () => {
     setNewUserId('');
   };
 
-
   const handleUpdateClose = () => {
     setOpenUpdateModal(false);
   };
@@ -193,7 +192,28 @@ const EquipmentList = () => {
     });
   };
 
-  
+  const handleUpdate = async () => {
+    try {
+      await api.put(`/equipments/${selectedEquipmentId}/`, updateFormData);
+      toast.success('Equipment updated successfully!', {
+        position: 'top-right',
+      });
+      fetchEquipment();
+      setOpenUpdateModal(false);
+    } catch (error) {
+      console.error('Error:', error.response?.data || error.message);
+      toast.error(
+        `Error: ${
+          error.response?.data?.message ||
+          'No se pudo actualizar el equipo. Inténtalo de nuevo'
+        }`,
+        {
+          position: 'bottom-left',
+        },
+      );
+    }
+  };
+
 
   return (
     <Container>
@@ -332,10 +352,14 @@ const EquipmentList = () => {
           </FormControl>
           <FormControl fullWidth margin="normal">
             <TextField
-              label="Fecha de Compra"
               name="purchase_date"
+              label="Fecha de Compra"
+              type="date"
               value={updateFormData.purchase_date}
               onChange={handleChange}
+              InputLabelProps={{
+                shrink: true,
+              }}
             />
           </FormControl>
           <FormControl fullWidth margin="normal">
@@ -354,10 +378,14 @@ const EquipmentList = () => {
               onChange={handleChange}
             />
           </FormControl>
-          <Button onClick={handleReassign} color="primary" variant="contained">
-            Reasignar
+          <Button onClick={handleUpdate} color="primary" variant="contained">
+            Actualizar
           </Button>
-          <Button onClick={handleUpdateClose} color="secondary" variant="contained">
+          <Button
+            onClick={handleUpdateClose}
+            color="secondary"
+            variant="contained"
+          >
             Cancelar
           </Button>
         </Box>
