@@ -13,6 +13,7 @@ import {
   InputLabel,
   MenuItem,
   FormControl,
+  TextField
 } from '@mui/material';
 import api from '../services/api';
 import { toast } from 'react-toastify';
@@ -20,19 +21,25 @@ import 'react-toastify/dist/ReactToastify.css';
 import { SharedContext } from '../SharedContext';
 
 const EquipmentList = () => {
-  const [equipment, setEquipment] = useState([]);
   const { sharedVariable, setSharedVariable } = useContext(SharedContext);
   const [open, setOpen] = useState(false);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [newDepartmentId, setNewDepartmentId] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [departments, setDepartments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [updateFormData, setUpdateFormData] = useState({
+    brand: '',
+    model: '',
+    purchase_date: '',
+    supplier: '',
+    cost: '',
+  });
 
   const fetchEquipment = useCallback(async () => {
     try {
       const response = await api.get('/equipments/');
-      setEquipment(response.data);
       setSharedVariable(response.data);
     } catch (error) {
       console.error('Error fetching equipment:', error);
@@ -162,6 +169,32 @@ const EquipmentList = () => {
     setNewUserId('');
   };
 
+
+  const handleUpdateClose = () => {
+    setOpenUpdateModal(false);
+  };
+
+  const handleOpenUpdate = (equipment) => {
+    setUpdateFormData({
+      brand: equipment.brand,
+      model: equipment.model,
+      purchase_date: equipment.purchase_date,
+      supplier: equipment.supplier,
+      cost: equipment.cost,
+    });
+    setSelectedEquipmentId(equipment.id);
+    setOpenUpdateModal(true);
+  };
+
+  const handleChange = (e) => {
+    setUpdateFormData({
+      ...updateFormData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  
+
   return (
     <Container>
       <Table>
@@ -189,7 +222,9 @@ const EquipmentList = () => {
                 <TableCell>{item.cost}</TableCell>
                 <TableCell>{item.active ? 'Alta' : 'Baja'}</TableCell>
                 <TableCell>{item.user ? item.user : 'Sin usuario'}</TableCell>
-                <TableCell>{item.department ? item.department : 'Sin departamento'}</TableCell>
+                <TableCell>
+                  {item.department ? item.department : 'Sin departamento'}
+                </TableCell>
                 <TableCell>
                   <Button onClick={() => handleDelete(item.id)}>
                     Eliminar
@@ -200,6 +235,9 @@ const EquipmentList = () => {
                   </Button>
                   <Button onClick={() => handleActivate(item.id)}>
                     Dar de Alta
+                  </Button>
+                  <Button onClick={() => handleOpenUpdate(item)}>
+                    Actualizar
                   </Button>
                 </TableCell>
               </TableRow>
@@ -258,6 +296,68 @@ const EquipmentList = () => {
             Reasignar
           </Button>
           <Button onClick={handleClose} color="secondary" variant="contained">
+            Cancelar
+          </Button>
+        </Box>
+      </Modal>
+
+      <Modal open={openUpdateModal} onClose={() => setOpenUpdateModal(false)}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <h2>Actualizar Equipo</h2>
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Marca"
+              name="brand"
+              value={updateFormData.brand}
+              onChange={handleChange}
+            />
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Modelo"
+              name="model"
+              value={updateFormData.model}
+              onChange={handleChange}
+            />
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Fecha de Compra"
+              name="purchase_date"
+              value={updateFormData.purchase_date}
+              onChange={handleChange}
+            />
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Proveedor"
+              name="supplier"
+              value={updateFormData.supplier}
+              onChange={handleChange}
+            />
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Costo"
+              name="cost"
+              value={updateFormData.cost}
+              onChange={handleChange}
+            />
+          </FormControl>
+          <Button onClick={handleReassign} color="primary" variant="contained">
+            Reasignar
+          </Button>
+          <Button onClick={handleUpdateClose} color="secondary" variant="contained">
             Cancelar
           </Button>
         </Box>

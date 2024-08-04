@@ -1,19 +1,20 @@
 import React from 'react';
-import { Container, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import EquipmentList from './components/EquipmentList';
 import EquipmentForm from './components/EquipmentForm';
 import { ToastContainer } from 'react-toastify';
+import Layout from './components/Layout';
 
 const App = () => {
   return (
-    <Container>
+    <Layout>
       <Typography variant="h4" gutterBottom>
         Control de Inventarios
       </Typography>
       <EquipmentForm />
       <EquipmentList />
       <ToastContainer />
-    </Container>
+    </Layout>
   );
 };
 
